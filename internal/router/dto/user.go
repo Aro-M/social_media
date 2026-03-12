@@ -5,16 +5,21 @@ import (
 )
 
 type RegisterRequest struct {
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-	Age       int    `json:"age" validate:"required,min=1"`
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=6"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Age       int    `json:"age"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token string       `json:"token"`
+	User  UserResponse `json:"user"`
 }
 
 type UserResponse struct {
@@ -29,4 +34,12 @@ type SearchRequest struct {
 	FirstName string `query:"first_name"`
 	LastName  string `query:"last_name"`
 	Age       int    `query:"age"`
+}
+
+type UpdateProfileRequest struct {
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	Age       *int    `json:"age"`
+	Email     *string `json:"email"`
+	Password  *string `json:"password"`
 }

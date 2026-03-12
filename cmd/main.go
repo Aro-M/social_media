@@ -10,14 +10,22 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sirupsen/logrus"
 
 	"social_media/internal/config"
+	"social_media/internal/controller"
 	"social_media/internal/repository/postgres"
-	"social_media/internal/router/handler"
+	"social_media/internal/router"
 	"social_media/internal/service"
 	"social_media/pkg/logger"
 )
+
+// @title Social Media API
+// @version 1.0
+// @description This is a social media application server.
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	if err := config.Init(config.DotEnv); err != nil {
@@ -25,11 +33,6 @@ func main() {
 	}
 
 	log := logger.New(config.LogLevel())
-
-	log.WithFields(logrus.Fields{
-		"version": config.Version(),
-		"port":    config.Port(),
-	}).Info("starting social_media")
 
 	repo, err := postgres.NewRepository()
 	if err != nil {
@@ -40,9 +43,14 @@ func main() {
 	svc := service.New(repo, log)
 
 	e := echo.New()
+	
+	// e.Debug() // for debug
 	e.Use(middleware.Recover())
-	h := handler.New(svc)
-	h.Register(e)
+	e.Use(middleware.Logger())
+
+	ctrl := controller.New(svc)
+	r := router.New(ctrl)
+	r.Register(e)
 
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", config.Port())); err != nil && err != http.ErrServerClosed {

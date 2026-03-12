@@ -11,7 +11,10 @@ func New(level string) *logrus.Logger {
 
 	log.SetOutput(os.Stdout)
 
-	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+		ForceColors:   true,
+	})
 
 	var l logrus.Level
 	switch level {

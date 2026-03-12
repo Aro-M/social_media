@@ -17,8 +17,6 @@ const (
 )
 
 const (
-	serviceName     = "SERVICE_NAME"
-	version         = "VERSION"
 	port            = "PORT"
 	logLevel        = "LOG_LEVEL"
 	dbHost          = "DB_HOST"
@@ -28,15 +26,14 @@ const (
 	dbPassword      = "DB_PASSWORD"
 	dbSSLMode       = "DB_SSLMODE"
 	shutdownTimeout = "SHUTDOWN_TIMEOUT"
+	jwtSecret       = "JWT_SECRET"
 )
 
 func Init(path Path) error {
-	if _, exists := os.LookupEnv("LOAD_FROM_DOCKER_ENV"); !exists {
-		if err := godotenv.Load(string(path)); err != nil {
-			logrus.WithField("path", path).Warn(".env file not found, reading from system environment")
-		} else {
-			logrus.WithField("path", path).Info(".env file loaded successfully")
-		}
+	if err := godotenv.Load(string(path)); err != nil {
+		logrus.WithField("path", path).Debug(".env file not loaded, continuing with system environment")
+	} else {
+		logrus.WithField("path", path).Info(".env file loaded successfully")
 	}
 
 	return checkENV()
@@ -44,9 +41,9 @@ func Init(path Path) error {
 
 func checkENV() error {
 	vars := []string{
-		serviceName, version, port, logLevel,
+		port, logLevel,
 		dbHost, dbPort, dbName, dbUser, dbPassword, dbSSLMode,
-		shutdownTimeout,
+		shutdownTimeout, jwtSecret,
 	}
 
 	for _, v := range vars {
@@ -74,14 +71,6 @@ func checkENV() error {
 
 	logrus.Info("All environment variables validated successfully")
 	return nil
-}
-
-func ServiceName() string {
-	return os.Getenv(serviceName)
-}
-
-func Version() string {
-	return os.Getenv(version)
 }
 
 func Port() int {
@@ -121,6 +110,10 @@ func DBSSLMode() string {
 func ShutdownTimeout() time.Duration {
 	val, _ := getDuration(shutdownTimeout)
 	return val
+}
+
+func JWTSecret() []byte {
+	return []byte(os.Getenv(jwtSecret))
 }
 
 func DSN() string {
